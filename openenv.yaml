@@ -1,0 +1,21 @@
+spec_version: 1
+name: supportops_env
+type: space
+runtime: fastapi
+app: server.app:app
+port: 8000
+description: >
+  SupportOps-Env is an OpenEnv-compliant RL environment for training agents
+  to triage, classify, and respond to customer support tickets.
+  Features 3 tasks of increasing difficulty: classification, priority sorting,
+  and response drafting with knowledge-base lookup.
+tasks:
+  - name: ticket_classification
+    difficulty: easy
+    description: Classify a support ticket into the correct category
+  - name: priority_sorting
+    difficulty: medium
+    description: Sort 5 tickets by urgency given metadata signals
+  - name: draft_response
+    difficulty: hard
+    description: Search a knowledge base and draft a resolution response
