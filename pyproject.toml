@@ -43,4 +43,5 @@ where = ["."]
 include = ["supportops_env*"]
 
 [project.scripts]
-supportops-server = "server.app:main"
+server = "server.app:main"
+
