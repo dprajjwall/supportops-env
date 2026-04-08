@@ -167,7 +167,7 @@ class SupportOpsEnvironment:
             self._state.is_done = True
 
         obs = self._build_observation(done=done, reward=reward, step_context=step_context)
-        obs.score_so_far = min(self._state.cumulative_reward, 1.0)
+        obs.score_so_far = min(self._state.cumulative_reward, 0.99)
         return obs
 
     # ──────────────────────────────────────────
