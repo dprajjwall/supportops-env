@@ -138,11 +138,18 @@ class SupportOpsEnvironment:
 
             # Final scoring at step limit
             reward = self._compute_final_reward_at_limit()
+            # Ensure final episode score lands precisely between 0.01 and 0.99
+            final_grade = min(max(reward, 0.01), 0.99)
+            terminal_reward = final_grade - self._state.cumulative_reward
+
+            self._state.cumulative_reward += terminal_reward
             self._state.is_done = True
-            self._state.cumulative_reward += reward
+            
+            # Use terminal_reward as the actual step reward
+            reward = terminal_reward
 
             obs = self._build_observation(done=True, reward=reward, step_context=step_context)
-            obs.score_so_far = min(max(self._state.cumulative_reward, 0.01), 0.99)
+            obs.score_so_far = self._state.cumulative_reward
             return obs
 
         # ── TASK 1: Ticket Classification ─────
@@ -162,12 +169,18 @@ class SupportOpsEnvironment:
             reward = 0.0
             done = True
 
-        self._state.cumulative_reward += reward
         if done:
+            # Ensure final episodic return (sum of all rewards) falls cleanly between 0.01 and 0.99
+            final_grade = min(max(reward, 0.01), 0.99)
+            terminal_reward = final_grade - self._state.cumulative_reward
+            self._state.cumulative_reward += terminal_reward
             self._state.is_done = True
+            reward = terminal_reward
+        else:
+            self._state.cumulative_reward += reward
 
         obs = self._build_observation(done=done, reward=reward, step_context=step_context)
-        obs.score_so_far = min(max(self._state.cumulative_reward, 0.01), 0.99)
+        obs.score_so_far = self._state.cumulative_reward
         return obs
 
     # ──────────────────────────────────────────

@@ -3,14 +3,10 @@ SupportOps-Env: Graders
 Deterministic scoring functions for each of the 3 tasks.
 All graders return a float in [0.0, 1.0].
 """
-from __future__ import annotations
 from typing import Any, Dict, List
 
-def _clip_score(score: float) -> float:
-    """Clips the score strictly within (0, 1) interval to pass Phase 2 validation."""
-    return min(max(score, 0.01), 0.99)
-
 # ─────────────────────────────────────────────────────────────────────────────
+
 # Task 1 Grader: Ticket Classification
 # ─────────────────────────────────────────────────────────────────────────────
 VALID_CATEGORIES = {"Bug", "Feature Request", "Billing", "Account", "General"}
@@ -65,25 +61,25 @@ def grade_classification(predicted: str, ground_truth: str) -> float:
         0.0  - wrong category
     """
     if not predicted:
-        return _clip_score(0.0)
+        return 0.0
 
     # Normalize
     pred_clean = predicted.strip()
 
     # Exact match (case-insensitive)
     if pred_clean.lower() == ground_truth.lower():
-        return _clip_score(1.0)
+        return 1.0
 
     # Check if it's a known alias
     canonical = CATEGORY_ALIASES.get(pred_clean.lower())
     if canonical and canonical.lower() == ground_truth.lower():
-        return _clip_score(0.5)
+        return 0.5
 
     # Check if the ground truth is contained in the prediction
     if ground_truth.lower() in pred_clean.lower():
-        return _clip_score(0.5)
+        return 0.5
 
-    return _clip_score(0.0)
+    return 0.0
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -141,7 +137,7 @@ def grade_priority_sorting(
     - 40% correct critical/non-critical classification
     """
     if not priorities_set:
-        return _clip_score(0.0)
+        return 0.0
 
     # Build agent's ordering from assigned priority levels
     def priority_value(label: str) -> int:
@@ -159,7 +155,7 @@ def grade_priority_sorting(
     valid_pred = [t for t in sorted_by_agent if t in ground_truth_order]
 
     if not valid_truth or not valid_pred:
-        return _clip_score(0.0)
+        return 0.0
 
     # Kendall tau component (60%)
     tau_score = _kendall_tau_score(valid_pred, valid_truth)
@@ -174,7 +170,7 @@ def grade_priority_sorting(
 
     # Composite
     score = 0.50 * tau_score + 0.30 * critical_match + 0.20 * coverage
-    return _clip_score(score)
+    return min(max(score, 0.0), 1.0)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -200,7 +196,7 @@ def grade_draft_response(
     - 0.15  Efficiency (fewer steps = better, up to a point)
     """
     if not draft_text:
-        return _clip_score(0.0)
+        return 0.0
 
     draft_lower = draft_text.lower()
     score = 0.0
