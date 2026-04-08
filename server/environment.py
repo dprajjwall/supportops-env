@@ -142,7 +142,7 @@ class SupportOpsEnvironment:
             self._state.cumulative_reward += reward
 
             obs = self._build_observation(done=True, reward=reward, step_context=step_context)
-            obs.score_so_far = self._state.cumulative_reward
+            obs.score_so_far = min(max(self._state.cumulative_reward, 0.01), 0.99)
             return obs
 
         # ── TASK 1: Ticket Classification ─────
@@ -167,7 +167,7 @@ class SupportOpsEnvironment:
             self._state.is_done = True
 
         obs = self._build_observation(done=done, reward=reward, step_context=step_context)
-        obs.score_so_far = min(self._state.cumulative_reward, 0.99)
+        obs.score_so_far = min(max(self._state.cumulative_reward, 0.01), 0.99)
         return obs
 
     # ──────────────────────────────────────────
