@@ -98,7 +98,7 @@ def _obs_to_response(obs: SupportObservation) -> EnvResponse:
     summary="Reset the environment",
     description="Start a new episode. Optionally specify task_name and seed.",
 )
-async def reset(request: ResetRequest) -> EnvResponse:
+async def reset(request: ResetRequest = ResetRequest()) -> EnvResponse:
     try:
         obs = _env.reset(
             task_name=request.task_name,
@@ -118,17 +118,16 @@ async def reset(request: ResetRequest) -> EnvResponse:
     summary="Execute an action",
     description="Send an action and receive the resulting observation, reward, and done flag.",
 )
-async def step(request: StepRequest) -> EnvResponse:
+async def step(request: StepRequest = None) -> EnvResponse:
+    if request is None or not request.action:
+        raise HTTPException(status_code=400, detail="Action is required in request body")
     try:
         action = SupportAction(**request.action)
-    except Exception as e:
-        raise HTTPException(status_code=422, detail=f"Invalid action format: {e}")
-
-    try:
         obs = _env.step(action)
         return _obs_to_response(obs)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Step failed: {e}")
+        raise HTTPException(status_code=400, detail=f"Invalid action or step failed: {e}")
+
 
 
 @app.get(
