@@ -15,5 +15,4 @@ outputs/
 *.egg-info/
 dist/
 build/
-inference.py
-client.py
+
