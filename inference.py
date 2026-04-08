@@ -25,7 +25,12 @@ import sys
 from typing import Any, Dict, List, Optional, Tuple
 
 import httpx
-from openai import AsyncOpenAI
+try:
+    from openai import AsyncOpenAI
+except ModuleNotFoundError:
+    print("CRITICAL ERROR: Failed to import 'openai'. This script requires the 'openai' package.", flush=True)
+    print("Please install it using: pip install openai>=1.0.0", flush=True)
+    sys.exit(1)
 
 # ─────────────────────────────────────────────
 # Configuration (from environment variables)
@@ -97,26 +102,34 @@ async def env_reset(
     task_name: str,
     seed: int = 42,
 ) -> Dict[str, Any]:
-    resp = await client.post(
-        f"{ENV_BASE_URL}/reset",
-        json={"task_name": task_name, "seed": seed},
-        timeout=30.0,
-    )
-    resp.raise_for_status()
-    return resp.json()
+    try:
+        resp = await client.post(
+            f"{ENV_BASE_URL}/reset",
+            json={"task_name": task_name, "seed": seed},
+            timeout=30.0,
+        )
+        resp.raise_for_status()
+        return resp.json()
+    except Exception as e:
+        print(f"[ERROR] env_reset failed: {e}", flush=True)
+        return {"done": True, "observation": {}, "error": str(e)}
 
 
 async def env_step(
     client: httpx.AsyncClient,
     action: Dict[str, Any],
 ) -> Dict[str, Any]:
-    resp = await client.post(
-        f"{ENV_BASE_URL}/step",
-        json={"action": action},
-        timeout=30.0,
-    )
-    resp.raise_for_status()
-    return resp.json()
+    try:
+        resp = await client.post(
+            f"{ENV_BASE_URL}/step",
+            json={"action": action},
+            timeout=30.0,
+        )
+        resp.raise_for_status()
+        return resp.json()
+    except Exception as e:
+        print(f"[ERROR] env_step failed: {e}", flush=True)
+        return {"done": True, "observation": {}, "reward": 0.0, "error": str(e)}
 
 
 # ─────────────────────────────────────────────

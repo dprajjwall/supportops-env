@@ -31,6 +31,8 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 COPY models.py ./models.py
 COPY server/ ./server/
 COPY openenv.yaml ./openenv.yaml
+COPY inference.py ./inference.py
+COPY client.py ./client.py
 
 # Set Python path so imports work correctly
 ENV PYTHONPATH="/app"
